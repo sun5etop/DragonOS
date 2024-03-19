@@ -223,6 +223,7 @@ impl Syscall {
             .get_socket(fd as i32)
             .ok_or(SystemError::EBADF)?;
         let mut socket = unsafe { socket.inner_no_preempt() };
+        println!("wrong thiz code");
         socket.bind(endpoint)?;
         return Ok(0);
     }
