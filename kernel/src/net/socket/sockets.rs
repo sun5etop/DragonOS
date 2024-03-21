@@ -277,24 +277,22 @@ impl UdpSocket {
     fn do_bind(&self, socket: &mut udp::Socket, endpoint: Endpoint) -> Result<(), SystemError> {
         if let Endpoint::Ip(Some(ip)) = endpoint {
             // 检测端口是否已被占用
-            kdebug!("udp: do_bind: , ep: {endpoint:?}");
+            kdebug!("udp: do_bind: , ip: {ip:?}");
             PORT_MANAGER.bind_port(self.metadata.socket_type, ip.port, self.handle.clone())?;
 
-            let bind_res = if ip.addr.is_unspecified() {
+            let bind_res = if !ip.addr.is_unspecified() {
                 println!("check1");
                 socket.bind(ip.port)
             } else {
                 println!("check2");
                 socket.bind(ip)
             };
-            kdebug!("bind res = {bind_res:?}");
 
             match bind_res {
                 Ok(()) => return Ok(()),
                 Err(_) => {
-                    println!("error here!");
-                    return Ok(());
-                    //return Err(SystemError::EINVAL);
+                    kdebug!("bind_res: {bind_res:?}");
+                    return Err(SystemError::EINVAL);
                 }
             }
         } else {
@@ -400,7 +398,7 @@ impl Socket for UdpSocket {
     fn bind(&mut self, endpoint: Endpoint) -> Result<(), SystemError> {
         let mut sockets = SOCKET_SET.lock_irqsave();
         let socket = sockets.get_mut::<udp::Socket>(self.handle.0);
-        // kdebug!("UDP Bind to {:?}", endpoint);
+        kdebug!("DP Bind to {:?}", endpoint);
         return self.do_bind(socket, endpoint);
     }
 
